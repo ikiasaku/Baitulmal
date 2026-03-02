@@ -41,33 +41,22 @@
             "memory": 256
         }
     },
-    "routes": [
+    "rewrites": [
         {
-            "src": "/deploy-native",
-            "dest": "api/deploy.php"
+            "source": "/deploy-native",
+            "destination": "api/deploy.php"
         },
         {
-            "src": "/list-users",
-            "dest": "api/list-users.php"
+            "source": "/list-users",
+            "destination": "api/list-users.php"
         },
         {
-            "src": "/health",
-            "dest": "api/health.php"
+            "source": "/health",
+            "destination": "api/health.php"
         },
         {
-            "src": "/(.*)",
-            "dest": "api/index.php"
+            "source": "/(.*)",
+            "destination": "api/index.php"
         }
-    ],
-    "env": {
-        "APP_NAME": "Baitulmall Masjid Kandri",
-        "APP_ENV": "production",
-        "APP_DEBUG": "false",
-        "LOG_CHANNEL": "stderr",
-        "DB_CONNECTION": "pgsql",
-        "VERCEL": "1",
-        "CACHE_STORE": "array",
-        "SESSION_DRIVER": "cookie",
-        "QUEUE_CONNECTION": "sync"
-    }
+    ]
 }
