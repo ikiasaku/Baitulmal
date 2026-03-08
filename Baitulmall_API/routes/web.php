@@ -11,6 +11,18 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/debug-products', function() {
+    try {
+        return response()->json([
+            'count' => \App\Models\Product::count(),
+            'first' => \App\Models\Product::first(),
+            'rts_count' => \App\Models\RT::count()
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+});
+
 // Urgent Sync Bridge in Web Routes
 Route::get('urgent-sync', function() {
     if (request('token') !== 'BAITULMALL_DEPLOY_2026') return response('Unauthorized', 401);
