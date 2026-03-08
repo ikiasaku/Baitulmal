@@ -169,9 +169,9 @@ const RoleFormModal = ({ isOpen, onClose, onSave, initialData, isSubmitting }) =
                             autoFocus
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full border rounded-xl px-4 py-3.5 focus:ring-1 focus:ring-blue-500/50 transition-all outline-none font-bold text-sm bg-black/20"
-                            style={{ borderColor: formData.name ? 'var(--border-color)' : '#ef4444', color: 'var(--text-main)' }}
-                            placeholder="Wajib diisi. Contoh: MANAGER KEUANGAN"
+                            className="w-full border rounded-xl px-4 py-3.5 focus:ring-1 focus:ring-blue-500/50 transition-all outline-none font-bold text-sm placeholder:font-normal"
+                            style={{ background: 'var(--input-bg)', borderColor: formData.name ? 'var(--border-color)' : '#ef4444', color: 'var(--text-main)' }}
+                            placeholder="Ketik nama jabatan di sini... (Contoh: KETUA RT)"
                             required
                         />
                     </div>
