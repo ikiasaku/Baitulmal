@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../services/productApi';
+import api from '../services/api';
 import { fetchRTs } from '../services/asnafApi';
 import {
     Plus, Search, Edit2, Trash2, X as XIcon,
@@ -358,18 +359,11 @@ const ProductManagement = () => {
                                                 const token = localStorage.getItem('token'); // Assuming auth token needed
                                                 // Need to import axios or use fetch. The existing code uses 'productApi' services.
                                                 // We should probably add this to the api service, but for quick implementation:
-                                                const response = await fetch('http://localhost:8000/v1/ai/generate-description', {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/json',
-                                                        'Authorization': `Bearer ${token}`
-                                                    },
-                                                    body: JSON.stringify({
-                                                        name: formData.name,
-                                                        category: formData.category
-                                                    })
+                                                const response = await api.post('ai/generate-description', {
+                                                    name: formData.name,
+                                                    category: formData.category
                                                 });
-                                                const data = await response.json();
+                                                const data = response.data;
                                                 if (data.description) {
                                                     setFormData(prev => ({ ...prev, description: data.description }));
                                                 } else {
