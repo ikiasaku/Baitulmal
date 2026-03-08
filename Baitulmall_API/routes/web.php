@@ -4,11 +4,22 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 
 Route::get('/', function () {
-    return response()->json([
-        'status' => 'Baitulmall API is online',
-        'version' => '1.2.1',
-        'docs' => '/api/v1/test'
-    ]);
+    try {
+        return response()->json([
+            'status' => 'Baitulmall API is online',
+            'version' => '1.2.2-debug',
+            'products_count' => \App\Models\Product::count(),
+            'rts_count' => \App\Models\RT::count(),
+            'first_product' => \App\Models\Product::first(),
+            'db_connection' => config('database.default')
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'Baitulmall API is online - ERROR',
+            'error' => $e->getMessage(),
+            'db_connection' => config('database.default')
+        ]);
+    }
 });
 
 Route::get('/debug-products', function() {
