@@ -42,19 +42,24 @@ const ProductManagement = () => {
 
     const loadData = async () => {
         setLoading(true);
-        try {
-            const [productsRes, rtsRes] = await Promise.all([
-                fetchProducts({ limit: 100 }),
-                fetchRTs()
-            ]);
 
+        // Load Products
+        try {
+            const productsRes = await fetchProducts({ limit: 100 });
             setProducts(Array.isArray(productsRes.data) ? productsRes.data : []);
+        } catch (error) {
+            console.error("Failed to load products", error);
+        }
+
+        // Load RTs
+        try {
+            const rtsRes = await fetchRTs();
             setRts(Array.isArray(rtsRes) ? rtsRes : (rtsRes.data || []));
         } catch (error) {
-            console.error("Failed to load data", error);
-        } finally {
-            setLoading(false);
+            console.error("Failed to load RTs", error);
         }
+
+        setLoading(false);
     };
 
     // Handlers
