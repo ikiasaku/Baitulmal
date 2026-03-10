@@ -36,7 +36,7 @@ const SettingPage = () => {
     const [submitting, setSubmitting] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [modal, setModal] = useState({ open: false, data: null });
-    const [activeTab, setActiveTab] = useState('profil');
+    const [activeTab, setActiveTab] = useState('keuangan');
     const [saveStatus, setSaveStatus] = useState(null);
     const { currentRole, refreshUser, hasPermission } = useRole();
 
@@ -164,53 +164,6 @@ const SettingPage = () => {
             setSubmitting(false);
         }
     };
-
-    const handleSaveProfileConfig = async () => {
-        if (submitting) return;
-        setSubmitting(true);
-        try {
-            const keysToSave = [
-                { key: 'org_name', type: 'string', label: 'Nama Institusi Utama', default: 'Baitulmal Fajar Maqbul' },
-                { key: 'org_address', type: 'string', label: 'Alamat Lengkap Kantor', default: 'Jl. Kandri, Semarang, Jawa Tengah' },
-                { key: 'org_phone', type: 'string', label: 'Nomor Kontak Utama', default: '08123456789' },
-                { key: 'org_email', type: 'string', label: 'Email Kontak Resmi', default: 'info@baitulmal.com' }
-            ];
-
-            for (const item of keysToSave) {
-                const val = configData[item.key] || item.default;
-                const existing = settings.find(s => s.key_name === item.key);
-
-                if (existing) {
-                    if (existing.value !== String(val)) {
-                        await updateSetting(existing.id, {
-                            key_name: item.key,
-                            value: String(val),
-                            type: item.type,
-                            description: item.label
-                        });
-                    }
-                } else {
-                    await createSetting({
-                        key_name: item.key,
-                        value: String(val),
-                        type: item.type,
-                        description: item.label
-                    });
-                }
-            }
-
-            await loadSettings();
-            alert('Profil Baitulmal berhasil disimpan!');
-        } catch (err) {
-            console.error('Failed to save profile config:', err);
-            const errorDetail = err.response?.data?.message || err.response?.data?.error || err.message;
-            alert('Gagal menyimpan profil: ' + errorDetail + (err.code ? ` (${err.code})` : ''));
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-
 
     // User CRUD Handlers
     const handleSaveUserCredentials = async (userId, data) => {
@@ -397,7 +350,6 @@ const SettingPage = () => {
                 {/* Sidebar Navigation */}
                 <div className="flex flex-col gap-2">
                     {[
-                        { id: 'profil', label: 'Profil Baitulmal', icon: <Building2 size={18} /> },
                         { id: 'keuangan', label: 'Konfigurasi Zakat', icon: <Wallet size={18} /> },
                         { id: 'pengguna', label: 'Manajemen Pengguna', icon: <SettingsIcon size={18} /> },
                         { id: 'role', label: 'Manajemen Role', icon: <Shield size={18} /> },
@@ -435,68 +387,6 @@ const SettingPage = () => {
                     {/* Interior Glow */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[100px] pointer-events-none"></div>
                     <div style={{ color: 'var(--text-main)' }}>
-                        {activeTab === 'profil' && (
-                            <div className="animate-slide-up space-y-6">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-xl font-bold flex items-center gap-3" style={{ color: 'var(--text-main)' }}>
-                                        <Building2 size={24} className="text-blue-500" /> Profil Baitulmal
-                                    </h3>
-                                    <button
-                                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-900/20"
-                                        onClick={() => handleSaveProfileConfig()}
-                                        disabled={submitting}
-                                    >
-                                        {submitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                                        Simpan Profil
-                                    </button>
-                                </div>
-                                <div className="space-y-6">
-                                    <div className="form-group">
-                                        <label className="mb-2 block text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Nama Institusi / Masjid</label>
-                                        <input
-                                            type="text"
-                                            className="input w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                            value={configData['org_name'] || ''}
-                                            onChange={(e) => handleConfigChange('org_name', e.target.value)}
-                                            placeholder="Baitulmal Fajar Maqbul"
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label className="mb-2 block text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Alamat Lengkap</label>
-                                        <textarea
-                                            rows={3}
-                                            className="input w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                            value={configData['org_address'] || ''}
-                                            onChange={(e) => handleConfigChange('org_address', e.target.value)}
-                                            placeholder="Jl. Kandri, Semarang, Jawa Tengah"
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="form-group">
-                                            <label className="text-slate-400 mb-2 block text-sm font-medium">Nomor Telepon/WA</label>
-                                            <input
-                                                type="text"
-                                                className="input w-full"
-                                                value={configData['org_phone'] || ''}
-                                                onChange={(e) => handleConfigChange('org_phone', e.target.value)}
-                                                placeholder="08123456789"
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label className="text-slate-400 mb-2 block text-sm font-medium">Email Resmi</label>
-                                            <input
-                                                type="email"
-                                                className="input w-full"
-                                                value={configData['org_email'] || ''}
-                                                onChange={(e) => handleConfigChange('org_email', e.target.value)}
-                                                placeholder="info@baitulmal.com"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
                         {activeTab === 'keuangan' && (
                             <div className="animate-slide-up space-y-6">
                                 <div className="flex items-center justify-between mb-6">
