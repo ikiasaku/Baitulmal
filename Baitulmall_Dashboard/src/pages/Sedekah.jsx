@@ -795,8 +795,13 @@ const PengeluaranTable = ({ month, year, isPrintMode = false, signer }) => {
 
     const handleDelete = async (id) => {
         if (!window.confirm("Hapus data pengeluaran ini?")) return;
-        await deletePengeluaran(id);
-        load();
+        try {
+            await deletePengeluaran(id);
+            load();
+        } catch (e) {
+            console.error("Delete Pengeluaran Error:", e);
+            alert("Gagal menghapus data: " + (e.response?.data?.message || e.message));
+        }
     };
 
     const openEdit = (item) => {

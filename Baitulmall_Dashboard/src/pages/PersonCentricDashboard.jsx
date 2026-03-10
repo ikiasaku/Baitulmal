@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Users, User, Briefcase, ShieldAlert, AlertTriangle, Search,
     Filter, Phone, Mail, MoreVertical, LayoutGrid, List,
-    UserCheck, UserMinus, Zap, ShieldCheck, Edit2, Trash2, X, Plus, Star
+    UserCheck, UserMinus, Zap, ShieldCheck, Edit2, Trash2, X, Plus, Star,
+    FileText, Upload, Download
 } from 'lucide-react';
 import { fetchPeopleOverview, updatePerson, deletePerson } from '../services/personApi';
+import { exportSDMBackup, importSDMBackup } from '../services/backupApi';
 
 const PersonCentricDashboard = () => {
     const [loading, setLoading] = useState(true);
@@ -13,6 +15,7 @@ const PersonCentricDashboard = () => {
     const [filter, setFilter] = useState('all');
     const [sortBy, setSortBy] = useState('nama'); // nama, roles, score
     const [viewMode, setViewMode] = useState('grid'); // grid, list
+    const fileImportRef = useRef(null);
 
     // Modals State
     const [showEdit, setShowEdit] = useState(false);
@@ -131,6 +134,41 @@ const PersonCentricDashboard = () => {
         });
     };
 
+    const handleExportJSON = async () => {
+        try {
+            await exportSDMBackup();
+        } catch (error) {
+            alert("Gagal mengekspor data SDM.");
+        }
+    };
+
+    const handleImportJSON = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!window.confirm("Apakah Anda yakin ingin memulihkan data SDM dari file JSON ini? Struktur organisasi, personal, dan tugas akan diperbarui.")) {
+            e.target.value = '';
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const result = await importSDMBackup(file);
+            if (result.success) {
+                alert(`Berhasil memulihkan data SDM! ${result.count || ''} data diproses.`);
+                loadData();
+            } else {
+                alert("Gagal memulihkan data: " + (result.message || "Error tidak diketahui"));
+            }
+        } catch (error) {
+            console.error("Import SDM error:", error);
+            alert("Gagal memulihkan data SDM. Pastikan format file benar.");
+        } finally {
+            setLoading(false);
+            e.target.value = '';
+        }
+    };
+
     if (loading) return (
         <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
             <div className="spinner-border text-primary mb-3" role="status"></div>
@@ -215,6 +253,35 @@ const PersonCentricDashboard = () => {
                             style={{ border: 'none', fontWeight: 600, fontSize: '0.85rem' }}
                         >
                             <List size={16} />
+                        </button>
+                    </div>
+
+                    {/* Backup & Restore Buttons */}
+                    <div className="d-flex gap-2">
+                        <button
+                            onClick={handleExportJSON}
+                            className="btn btn-dark rounded-4 px-3 d-flex align-items-center gap-2"
+                            style={{ height: '44px', background: '#222', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', fontWeight: 600, fontSize: '0.9rem' }}
+                            title="Backup SDM to JSON"
+                        >
+                            <FileText size={18} className="text-info" />
+                            <span className="d-none d-xl-inline">Backup</span>
+                        </button>
+                        <button
+                            onClick={() => fileImportRef.current.click()}
+                            className="btn btn-dark rounded-4 px-3 d-flex align-items-center gap-2"
+                            style={{ height: '44px', background: '#222', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', fontWeight: 600, fontSize: '0.9rem' }}
+                            title="Restore SDM from JSON"
+                        >
+                            <Upload size={18} className="text-warning" />
+                            <span className="d-none d-xl-inline">Restore</span>
+                            <input
+                                type="file"
+                                ref={fileImportRef}
+                                style={{ display: 'none' }}
+                                accept=".json"
+                                onChange={handleImportJSON}
+                            />
                         </button>
                     </div>
                 </div>

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { fetchAsnafList, createAsnaf, updateAsnaf as updateAsnafApi, deleteAsnaf as deleteAsnafApi, fetchRTs } from '../services/asnafApi';
 import { fetchStrukturInti } from '../services/kepengurusanApi';
 import { fetchSettings } from '../services/settingApi';
+import { exportAsnafBackup, importAsnafBackup } from '../services/backupApi';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal';
 import DeathReportModal from '../components/DeathReportModal';
 import { Loader2, AlertCircle as AlertIcon, X as XIcon, HeartCrack } from 'lucide-react';
@@ -91,6 +92,7 @@ const AsnafPrint = ({ data, rt, kategori, isSpecialCategoryMode, signers }) => (
 const AsnafManagement = () => {
     // Print State
     const printRef = useRef(null);
+    const fileImportRef = useRef(null);
     const handlePrint = usePagePrint(printRef, 'Daftar Asnaf');
 
     // API State
@@ -399,6 +401,41 @@ const AsnafManagement = () => {
         }
     };
 
+    const handleImportJSON = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!window.confirm('Apakah Anda yakin ingin memulihkan data dari file JSON ini? Data yang ada mungkin akan diperbarui atau ditambahkan.')) {
+            e.target.value = '';
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const result = await importAsnafBackup(file);
+            if (result.success) {
+                alert(`Berhasil memulihkan data! ${result.count} data diproses.`);
+                loadData();
+            } else {
+                alert('Gagal memulihkan data: ' + (result.message || 'Error tidak diketahui'));
+            }
+        } catch (error) {
+            console.error('Import JSON error:', error);
+            alert('Gagal memulihkan data. Pastikan format file benar.');
+        } finally {
+            setLoading(false);
+            e.target.value = '';
+        }
+    };
+
+    const handleExportJSON = async () => {
+        try {
+            await exportAsnafBackup();
+        } catch (error) {
+            alert('Gagal mengekspor data JSON.');
+        }
+    };
+
     return (
         <div className="asnaf-management-outer">
 
@@ -468,6 +505,51 @@ const AsnafManagement = () => {
                             >
                                 <Download size={20} />
                                 <span>Export Excel</span>
+                            </button>
+
+                            <button
+                                className="btn btn-ghost"
+                                style={{
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '12px',
+                                    fontWeight: 700,
+                                    padding: '0 1.25rem',
+                                    height: '48px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    background: 'rgba(255,255,255,0.02)'
+                                }}
+                                onClick={handleExportJSON}
+                            >
+                                <FileText size={20} className="text-info" />
+                                <span>Backup JSON</span>
+                            </button>
+
+                            <button
+                                className="btn btn-ghost"
+                                style={{
+                                    border: '1px solid var(--border-color)',
+                                    borderRadius: '12px',
+                                    fontWeight: 700,
+                                    padding: '0 1.25rem',
+                                    height: '48px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.75rem',
+                                    background: 'rgba(255,255,255,0.02)'
+                                }}
+                                onClick={() => fileImportRef.current.click()}
+                            >
+                                <Upload size={20} className="text-warning" />
+                                <span>Restore JSON</span>
+                                <input
+                                    type="file"
+                                    ref={fileImportRef}
+                                    style={{ display: 'none' }}
+                                    accept=".json"
+                                    onChange={handleImportJSON}
+                                />
                             </button>
                         </div>
                     </div>
