@@ -203,7 +203,8 @@ const SettingPage = () => {
             alert('Profil Baitulmal berhasil disimpan!');
         } catch (err) {
             console.error('Failed to save profile config:', err);
-            alert('Gagal menyimpan profil: ' + (err.response?.data?.message || err.message));
+            const errorDetail = err.response?.data?.message || err.response?.data?.error || err.message;
+            alert('Gagal menyimpan profil: ' + errorDetail + (err.code ? ` (${err.code})` : ''));
         } finally {
             setSubmitting(false);
         }

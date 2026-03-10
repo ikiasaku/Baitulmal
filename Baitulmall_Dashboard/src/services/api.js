@@ -2,12 +2,12 @@ import axios from 'axios';
 
 let rawUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8001/api/v1';
 
-// Ensure /v1 prefix if missing (optional, but helps if user forgets)
-if (!rawUrl.includes('/v1')) {
-    rawUrl = rawUrl.replace(/\/$/, '') + '/v1';
+// Ensure /v1 prefix if missing
+if (rawUrl && !rawUrl.includes('/v1')) {
+    rawUrl = rawUrl.replace(/\/$/, '') + '/api/v1';
 }
 
-const BASE_URL = rawUrl.replace(/\/$/, '') + '/';
+const BASE_URL = rawUrl ? (rawUrl.replace(/\/$/, '') + '/') : 'http://127.0.0.1:8001/api/v1/';
 
 const api = axios.create({
     baseURL: BASE_URL,
